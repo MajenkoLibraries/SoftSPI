@@ -4,7 +4,7 @@
     "license": "LICENSE.md",
     "readme": "README.md",
     "description": "Software SPI implementation",
-    "category": "IO",
+    "category": "Communications",
     "subcategory": "Serial",
     "maintainer": "Matt Jenkins <matt@majenko.co.uk>",
     "version": "1.0.0",
