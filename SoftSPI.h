@@ -58,5 +58,7 @@ class SoftSPI : public SPIClass {
         void setDataMode(uint8_t);
         void setClockDivider(uint8_t);
         uint8_t transfer(uint8_t);
+		uint16_t transfer16(uint16_t data);
+		
 };
 #endif
