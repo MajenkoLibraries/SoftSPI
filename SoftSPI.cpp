@@ -109,8 +109,7 @@ void SoftSPI::setClockDivider(uint8_t div) {
 
 uint8_t SoftSPI::transfer(uint8_t val) {
     uint8_t out = 0;
-
-    if (_order == LSBFIRST) {
+    if (_order == MSBFIRST) {
         uint8_t v2 = 
             ((val & 0x01) << 7) |
             ((val & 0x02) << 5) |
@@ -135,7 +134,7 @@ uint8_t SoftSPI::transfer(uint8_t val) {
 
         if (_cke) {
             bval = digitalRead(_miso);
-            if (_order == LSBFIRST) {
+            if (_order == MSBFIRST) {
                 out <<= 1;
                 out |= bval;
             } else {
@@ -160,7 +159,7 @@ uint8_t SoftSPI::transfer(uint8_t val) {
             digitalWrite(_mosi, val & (1<<bit) ? HIGH : LOW);
         } else {
             bval = digitalRead(_miso);
-            if (_order == LSBFIRST) {
+            if (_order == MSBFIRST) {
                 out <<= 1;
                 out |= bval;
             } else {
@@ -174,4 +173,27 @@ uint8_t SoftSPI::transfer(uint8_t val) {
         }
     }
     return out;
+}
+
+uint16_t SoftSPI::transfer16(uint16_t data)
+{
+	union {
+		uint16_t val;
+		struct {
+			uint8_t lsb;
+			uint8_t msb;
+		};
+	} in, out;
+  
+	in.val = data;
+
+	if ( _order == MSBFIRST ) {
+		out.msb = transfer(in.msb);
+		out.lsb = transfer(in.lsb);
+	} else {
+		out.lsb = transfer(in.lsb);
+		out.msb = transfer(in.msb);
+	}
+
+	return out.val;
 }
