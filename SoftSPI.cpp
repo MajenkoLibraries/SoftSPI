@@ -76,6 +76,8 @@ void SoftSPI::setDataMode(uint8_t mode) {
             _cke = 1;
             break;
     }
+
+    digitalWrite(_sck, _ckp ? HIGH : LOW));
 }
 
 void SoftSPI::setClockDivider(uint8_t div) {
@@ -107,6 +109,12 @@ void SoftSPI::setClockDivider(uint8_t div) {
     }
 }
 
+void SoftSPI::wait(uint_fast8_t del) {
+    for (uint_fast8_t i = 0; i < del; i++) {
+        asm volatile("nop");
+    }
+}
+
 uint8_t SoftSPI::transfer(uint8_t val) {
     uint8_t out = 0;
     if (_order == MSBFIRST) {
@@ -125,15 +133,34 @@ uint8_t SoftSPI::transfer(uint8_t val) {
     uint8_t del = _delay >> 1;
 
     uint8_t bval = 0;
-    for (uint8_t bit = 0; bit < 8; bit++) {
-        digitalWrite(_sck, _ckp ? LOW : HIGH);
+    /*
+     * CPOL := 0, CPHA := 0 => INIT = 0, PRE = Z|0, MID = 1, POST =  0
+     * CPOL := 1, CPHA := 0 => INIT = 1, PRE = Z|1, MID = 0, POST =  1
+     * CPOL := 0, CPHA := 1 => INIT = 0, PRE =  1 , MID = 0, POST = Z|0
+     * CPOL := 1, CPHA := 1 => INIT = 1, PRE =  0 , MID = 1, POST = Z|1
+     */
 
-        for (uint8_t i = 0; i < del; i++) {
-            asm volatile("nop");
+    int sck = (_cpe) ? HIGH : LOW;
+
+    for (uint8_t bit = 0u; bit < 8u; bit++)
+    {
+        if (_cke) {
+            sck ^= 1;
+            digitalWrite(_sck, sck);            
+            wait(del);
         }
 
-        if (_cke) {
+        /* ... Write bit */
+        digitalWrite(_mosi, ((val & (1<<bit)) ? HIGH : LOW));
+
+        wait(del);
+
+        sck ^= 1u; digitalWrite(_sck, sck);
+
+        /* ... Read bit */
+        {
             bval = digitalRead(_miso);
+
             if (_order == MSBFIRST) {
                 out <<= 1;
                 out |= bval;
@@ -141,37 +168,16 @@ uint8_t SoftSPI::transfer(uint8_t val) {
                 out >>= 1;
                 out |= bval << 7;
             }
-        } else {
-            digitalWrite(_mosi, val & (1<<bit) ? HIGH : LOW);
         }
 
-        for (uint8_t i = 0; i < del; i++) {
-            asm volatile("nop");
-        }
-            
-        digitalWrite(_sck, _ckp ? HIGH : LOW);
+        wait(del);
 
-        for (uint8_t i = 0; i < del; i++) {
-            asm volatile("nop");
-        }
-
-        if (_cke) {
-            digitalWrite(_mosi, val & (1<<bit) ? HIGH : LOW);
-        } else {
-            bval = digitalRead(_miso);
-            if (_order == MSBFIRST) {
-                out <<= 1;
-                out |= bval;
-            } else {
-                out >>= 1;
-                out |= bval << 7;
-            }
-        }
-
-        for (uint8_t i = 0; i < del; i++) {
-            asm volatile("nop");
+        if (!_cke) {
+            sck ^= 1u;
+            digitalWrite(_sck, sck);
         }
     }
+
     return out;
 }
 

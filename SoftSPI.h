@@ -42,6 +42,9 @@
 
 class SoftSPI : public SPIClass {
     private:
+        void wait(uint_fast8_t del);
+
+    private:
         uint8_t _cke;
         uint8_t _ckp;
         uint8_t _delay;
