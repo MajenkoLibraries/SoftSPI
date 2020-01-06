@@ -7,7 +7,7 @@
     "category": "Communications",
     "subcategory": "Serial",
     "maintainer": "Matt Jenkins <matt@majenko.co.uk>",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "family": "all",
     "core": "all",
     "install": {
