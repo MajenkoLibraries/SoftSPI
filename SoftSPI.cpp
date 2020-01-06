@@ -77,7 +77,7 @@ void SoftSPI::setDataMode(uint8_t mode) {
             break;
     }
 
-    digitalWrite(_sck, _ckp ? HIGH : LOW));
+    digitalWrite(_sck, _ckp ? HIGH : LOW);
 }
 
 void SoftSPI::setClockDivider(uint8_t div) {
@@ -140,7 +140,7 @@ uint8_t SoftSPI::transfer(uint8_t val) {
      * CPOL := 1, CPHA := 1 => INIT = 1, PRE =  0 , MID = 1, POST = Z|1
      */
 
-    int sck = (_cpe) ? HIGH : LOW;
+    int sck = (_ckp) ? HIGH : LOW;
 
     for (uint8_t bit = 0u; bit < 8u; bit++)
     {
