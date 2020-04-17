@@ -1,18 +1,1 @@
-{
-    "name": "SoftSPI",
-    "provides": "SoftSPI.h",
-    "license": "LICENSE.md",
-    "readme": "README.md",
-    "description": "Software SPI implementation",
-    "category": "Communications",
-    "subcategory": "Serial",
-    "maintainer": "Matt Jenkins <matt@majenko.co.uk>",
-    "version": "1.0.0",
-    "family": "all",
-    "core": "all",
-    "install": {
-        "examples": "/",
-        "SoftSPI.cpp": "/",
-        "SoftSPI.h": "/"
-    }
-}
+{"name":"SoftSPI","provides":"SoftSPI.h","license":"LICENSE.md","readme":"README.md","description":"Software SPI implementation","category":"Communication","subcategory":"Serial","maintainer":"Matt Jenkins <matt@majenko.co.uk>","version":"1.0.1","family":"all","core":"all","install":{"examples":"\/","library.properties":"\/","src":"\/"}}
