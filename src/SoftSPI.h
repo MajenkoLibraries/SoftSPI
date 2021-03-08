@@ -40,7 +40,7 @@
 
 #include <SPI.h>
 
-class SoftSPI : public SPIClass {
+class SoftSPI {
     private:
         void wait(uint_fast8_t del);
 

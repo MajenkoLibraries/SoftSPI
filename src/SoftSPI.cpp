@@ -41,6 +41,14 @@ SoftSPI::SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sck) {
     _order = MSBFIRST;
 }
 
+inline void digitalWriteDirect(int pin, boolean val){
+  if(val) g_APinDescription[pin].pPort -> PIO_SODR = g_APinDescription[pin].ulPin;
+  else    g_APinDescription[pin].pPort -> PIO_CODR = g_APinDescription[pin].ulPin;
+}
+inline int digitalReadDirect(int pin){
+  return !!(g_APinDescription[pin].pPort -> PIO_PDSR & g_APinDescription[pin].ulPin);
+}
+
 void SoftSPI::begin() {
     pinMode(_mosi, OUTPUT);
     pinMode(_miso, INPUT);
@@ -77,36 +85,18 @@ void SoftSPI::setDataMode(uint8_t mode) {
             break;
     }
 
-    digitalWrite(_sck, _ckp ? HIGH : LOW);
+    digitalWriteDirect(_sck, _ckp ? HIGH : LOW);
 }
 
-void SoftSPI::setClockDivider(uint8_t div) {
-    switch (div) {
-        case SPI_CLOCK_DIV2:
-            _delay = 2;
-            break;
-        case SPI_CLOCK_DIV4:
-            _delay = 4;
-            break;
-        case SPI_CLOCK_DIV8:
-            _delay = 8;
-            break;
-        case SPI_CLOCK_DIV16:
-            _delay = 16;
-            break;
-        case SPI_CLOCK_DIV32:
-            _delay = 32;
-            break;
-        case SPI_CLOCK_DIV64:
-            _delay = 64;
-            break;
-        case SPI_CLOCK_DIV128:
-            _delay = 128;
-            break;
-        default:
-            _delay = 128;
-            break;
-    }
+void SoftSPI::setClockDivider(uint8_t div) {			// Timing on Arduino Due
+    if (div == SPI_CLOCK_DIV2) _delay = 2;				// 307.7 kHz - 3.25 us per bit
+    else if (div == SPI_CLOCK_DIV4) _delay = 4;			// 285.7 kHz - 3.5 us per bit
+    else if (div == SPI_CLOCK_DIV8) _delay = 8;			// 258.5 kHz - 3.87 us per bit
+    else if (div == SPI_CLOCK_DIV16) _delay = 16;		// 210.2 kHz - 4.76 us per bit
+    else if (div == SPI_CLOCK_DIV32) _delay = 32;		// 156.9 kHz - 6.375 us per bit
+    else if (div == SPI_CLOCK_DIV64) _delay = 64;		// 101.3 kHz - 9.875 us per bit
+    else if (div == SPI_CLOCK_DIV128) _delay = 128;		// 101.3 kHz - 9.875 us per bit
+    else _delay = 0;									// 320 kHz - 3.125 us per bit
 }
 
 void SoftSPI::wait(uint_fast8_t del) {
@@ -146,20 +136,20 @@ uint8_t SoftSPI::transfer(uint8_t val) {
     {
         if (_cke) {
             sck ^= 1;
-            digitalWrite(_sck, sck);            
+            digitalWriteDirect(_sck, sck);            
             wait(del);
         }
 
         /* ... Write bit */
-        digitalWrite(_mosi, ((val & (1<<bit)) ? HIGH : LOW));
+        digitalWriteDirect(_mosi, ((val & (1<<bit)) ? HIGH : LOW));
 
         wait(del);
 
-        sck ^= 1u; digitalWrite(_sck, sck);
+        sck ^= 1u; digitalWriteDirect(_sck, sck);
 
         /* ... Read bit */
         {
-            bval = digitalRead(_miso);
+            bval = digitalReadDirect(_miso);
 
             if (_order == MSBFIRST) {
                 out <<= 1;
@@ -174,7 +164,7 @@ uint8_t SoftSPI::transfer(uint8_t val) {
 
         if (!_cke) {
             sck ^= 1u;
-            digitalWrite(_sck, sck);
+            digitalWriteDirect(_sck, sck);
         }
     }
 
