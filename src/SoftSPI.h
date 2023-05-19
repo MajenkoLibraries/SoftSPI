@@ -59,7 +59,7 @@ class SoftSPI : public SPIClass {
         void end();
         void setBitOrder(uint8_t);
         void setDataMode(uint8_t);
-        void setClockDivider(uint8_t);
+        void setClockDivider(uint32_t);
         uint8_t transfer(uint8_t);
 		uint16_t transfer16(uint16_t data);
 		

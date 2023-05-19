@@ -80,7 +80,7 @@ void SoftSPI::setDataMode(uint8_t mode) {
     digitalWrite(_sck, _ckp ? HIGH : LOW);
 }
 
-void SoftSPI::setClockDivider(uint8_t div) {
+void SoftSPI::setClockDivider(uint32_t div) {
     switch (div) {
         case SPI_CLOCK_DIV2:
             _delay = 2;
